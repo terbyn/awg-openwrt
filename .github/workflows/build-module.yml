@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Firmware v${{ matrix.build_env.tag }} :: ${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }}
+    name: Build Firmware
     runs-on: ubuntu-latest
     strategy:
       matrix:
