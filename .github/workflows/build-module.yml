@@ -53,11 +53,16 @@ jobs:
           curl -LO https://git.zx2c4.com/wireguard-linux-compat/snapshot/wireguard-linux-compat-1.0.20211208.tar.xz
           tar -xf wireguard-linux-compat-1.0.20211208.tar.xz
           cp -r wireguard-linux-compat-1.0.20211208/src/* .
+          rm -rf wireguard-linux-compat-1.0.20211208*
 
       - name: Patch kmod-amneziawg Makefile
         run: |
           sed -i '/selftest/d' sdk/feeds/awgopenwrt/kmod-amneziawg/Makefile
           sed -i '/^\s*patch/ s/^/#/' sdk/feeds/awgopenwrt/kmod-amneziawg/Makefile
+
+      - name: Copy fallback Makefile if missing
+        run: |
+          cp awg/kmod-fallback-makefile/Makefile sdk/build_dir/target-*/linux-*/kmod-amneziawg/Makefile || true
 
       - name: Build kernel module
         run: |
