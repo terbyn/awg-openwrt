@@ -55,6 +55,11 @@ jobs:
           cp -r wireguard-linux-compat-1.0.20211208/src/* .
           rm -rf wireguard-linux-compat-1.0.20211208*
 
+      - name: Copy WireGuard sources to kmod-amneziawg
+        run: |
+          cd sdk/build_dir/target-*/linux-*/linux-*
+          cp -r drivers/net/wireguard/* ../kmod-amneziawg/
+
       - name: Patch kmod-amneziawg Makefile
         run: |
           sed -i '/selftest/d' sdk/feeds/awgopenwrt/kmod-amneziawg/Makefile
