@@ -45,11 +45,10 @@ jobs:
           echo "CONFIG_PACKAGE_kmod-amneziawg=m" >> .config
           make defconfig
 
-      - name: Download kernel sources
+      - name: Extract kernel sources manually
         run: |
           cd sdk
-          make target/linux/download V=s
-          make target/linux/{prepare,compile} -j$(nproc) V=s
+          make target/linux/prepare -j$(nproc) V=s
 
       - name: Build kernel module
         run: |
