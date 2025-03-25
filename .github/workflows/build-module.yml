@@ -30,7 +30,7 @@ jobs:
           SDK_URL="https://downloads.openwrt.org/releases/${{ matrix.build_env.tag }}/targets/${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }}/openwrt-sdk-${{ matrix.build_env.tag }}-${{ matrix.build_env.target }}-${{ matrix.build_env.subtarget }}_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
           wget "$SDK_URL" -O sdk.tar.xz
           mkdir -p sdk
-          tar -C sdk --strip-components=1 -xf sdk.tar.xz || (echo "❌ Failed to extract SDK" && ls -la && exit 1)
+          tar -C sdk --strip-components=1 -xf sdk.tar.xz
 
       - name: Add AWG feed and install packages
         run: |
@@ -44,6 +44,12 @@ jobs:
           wget https://downloads.openwrt.org/releases/${{ matrix.build_env.tag }}/targets/${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }}/config.buildinfo -O .config
           echo "CONFIG_PACKAGE_kmod-amneziawg=m" >> .config
           make defconfig
+
+      - name: Download kernel sources
+        run: |
+          cd sdk
+          make target/linux/download V=s
+          make target/linux/{prepare,compile} -j$(nproc) V=s
 
       - name: Build kernel module
         run: |
