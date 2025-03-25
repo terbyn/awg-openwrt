@@ -51,8 +51,8 @@ jobs:
           mkdir -p drivers/net/wireguard
           cd drivers/net/wireguard
           wget https://git.zx2c4.com/wireguard-linux-compat/snapshot/wireguard-linux-compat-1.0.20211208.tar.xz
-          tar -xf wireguard-linux-compat-1.0.20211208.tar.xz --strip-components=3 --wildcards --no-anchored "wireguard-linux-compat-1.0.20211208/src/*.c" "wireguard-linux-compat-1.0.20211208/src/*.h"
-          
+          tar -xf wireguard-linux-compat-1.0.20211208.tar.xz --strip-components=3 --wildcards "wireguard-linux-compat-1.0.20211208/src/*.c" "wireguard-linux-compat-1.0.20211208/src/*.h"
+
       - name: Build kernel module
         run: |
           cd sdk
