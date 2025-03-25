@@ -1,68 +1,54 @@
 name: Build kmod-amneziawg Only
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
 
 jobs:
-  build-kmod:
-    name: Build kmod-amneziawg for ${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }}
+  build:
+    name: Build kmod-amneziawg for mediatek/filogic
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        build_env:
-          - tag: "23.05.3"
-            pkgarch: aarch64_cortex-a53
-            target: mediatek
-            subtarget: filogic
-            vermagic: "41392fa5d8b91d66a73856a250335fa2"
 
     steps:
       - name: Checkout AWG repo
         uses: actions/checkout@v4
-        with:
-          repository: yury-sannikov/awg-openwrt
-          path: awg
 
       - name: Download and extract OpenWrt SDK
         run: |
-          SDK_URL="https://downloads.openwrt.org/releases/${{ matrix.build_env.tag }}/targets/${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }}/openwrt-sdk-${{ matrix.build_env.tag }}-${{ matrix.build_env.target }}-${{ matrix.build_env.subtarget }}_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
-          wget "$SDK_URL"
-          tar -xf openwrt-sdk-*.tar.xz
-          mv openwrt-sdk-* sdk
+          export SDK_URL="https://downloads.openwrt.org/releases/23.05.3/targets/mediatek/filogic/openwrt-sdk-23.05.3-mediatek-filogic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+          echo "Downloading SDK from $SDK_URL"
+          wget "$SDK_URL" -O sdk.tar.xz
+          mkdir sdk
+          tar -xf sdk.tar.xz -C sdk --strip-components=1
 
       - name: Add AWG feed and install packages
         run: |
+          echo "src-git awgopenwrt https://github.com/yury-sannikov/awg-openwrt.git" >> sdk/feeds.conf
           cd sdk
-          echo "src-git awgopenwrt https://github.com/yury-sannikov/awg-openwrt" >> feeds.conf.default
-          ./scripts/feeds update -a && ./scripts/feeds install -a
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
 
       - name: Prepare .config with only kmod-amneziawg
         run: |
           cd sdk
-          wget https://downloads.openwrt.org/releases/${{ matrix.build_env.tag }}/targets/${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }}/config.buildinfo -O .config
-          echo "CONFIG_PACKAGE_kmod-amneziawg=m" >> .config
+          echo "CONFIG_PACKAGE_kmod-amneziawg=m" > .config
           make defconfig
 
       - name: Build kernel module
         run: |
           cd sdk
-          make target/linux/compile -j$(nproc) V=s
           make package/kmod-amneziawg/compile -j$(nproc) V=s
 
       - name: Verify vermagic
         run: |
-          cd sdk
-          VERMAGIC=$(cat build_dir/target-*/linux-*/linux-*/.vermagic)
-          echo "VERMAGIC=$VERMAGIC"
-          if [ "$VERMAGIC" != "${{ matrix.build_env.vermagic }}" ]; then
-            echo "❌ Vermagic mismatch: $VERMAGIC != ${{ matrix.build_env.vermagic }}"
+          VERMAGIC_BUILT=$(cat sdk/build_dir/target-*/linux-*/linux-*/.vermagic)
+          echo "Built vermagic: $VERMAGIC_BUILT"
+          if [[ "$VERMAGIC_BUILT" != "41392fa5d8b91d66a73856a250335fa2" ]]; then
+            echo "Vermagic mismatch! Expected 41392fa5d8b91d66a73856a250335fa2"
             exit 1
           fi
 
       - name: Upload kmod-amneziawg
         uses: actions/upload-artifact@v4
         with:
-          name: kmod-amneziawg_${{ matrix.build_env.pkgarch }}
-          path: sdk/bin/targets/${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }}/packages/kmod-amneziawg_*.ipk
+          name: kmod-amneziawg-ipk
+          path: sdk/bin/targets/*/*/packages/kmod-amneziawg_*.ipk
