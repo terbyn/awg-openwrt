@@ -50,8 +50,9 @@ jobs:
           cd sdk/build_dir/target-*/linux-*/linux-*
           mkdir -p drivers/net/wireguard
           cd drivers/net/wireguard
-          wget https://git.zx2c4.com/wireguard-linux-compat/snapshot/wireguard-linux-compat-1.0.20211208.tar.xz
-          tar -xf wireguard-linux-compat-1.0.20211208.tar.xz --strip-components=3 --wildcards '*.c' '*.h'
+          curl -LO https://git.zx2c4.com/wireguard-linux-compat/snapshot/wireguard-linux-compat-1.0.20211208.tar.xz
+          tar -xf wireguard-linux-compat-1.0.20211208.tar.xz
+          cp -r wireguard-linux-compat-1.0.20211208/src/* .
 
       - name: Patch kmod-amneziawg Makefile
         run: |
