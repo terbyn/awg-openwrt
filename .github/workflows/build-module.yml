@@ -51,11 +51,12 @@ jobs:
           mkdir -p drivers/net/wireguard
           cd drivers/net/wireguard
           wget https://git.zx2c4.com/wireguard-linux-compat/snapshot/wireguard-linux-compat-1.0.20211208.tar.xz
-          tar -xf wireguard-linux-compat-1.0.20211208.tar.xz --strip-components=3 --wildcards 'wireguard-linux-compat-1.0.20211208/src/*.c' 'wireguard-linux-compat-1.0.20211208/src/*.h'
+          tar -xf wireguard-linux-compat-1.0.20211208.tar.xz --strip-components=3 --wildcards '*.c' '*.h'
 
       - name: Patch kmod-amneziawg Makefile
         run: |
           sed -i '/selftest/d' sdk/feeds/awgopenwrt/kmod-amneziawg/Makefile
+          sed -i '/^\s*patch/ s/^/#/' sdk/feeds/awgopenwrt/kmod-amneziawg/Makefile
 
       - name: Build kernel module
         run: |
