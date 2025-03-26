@@ -61,7 +61,7 @@ jobs:
 
       - name: Patch kmod-amneziawg Makefile
         run: |
-          MAKEFILE_PATH=$(find sdk/feeds -type f -path "*/kmod-amneziawg/Makefile" | head -n1)
+          MAKEFILE_PATH=$(find sdk/package/feeds -type f -path "*/kmod-amneziawg/Makefile" | head -n1)
           if [ -f "$MAKEFILE_PATH" ]; then
             sed -i '/selftest/d' "$MAKEFILE_PATH"
             sed -i '/^\s*patch/ s/^/#/' "$MAKEFILE_PATH"
