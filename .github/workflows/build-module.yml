@@ -35,7 +35,7 @@ jobs:
       - name: Add AWG feed and install packages
         run: |
           cd sdk
-          echo "src-git awgopenwrt https://github.com/yury-sannikov/awg-openwrt" >> feeds.conf.default
+          echo "src-link awgopenwrt ../awg" >> feeds.conf.default
           ./scripts/feeds update -a && ./scripts/feeds install -a
 
       - name: Prepare .config with only kmod-amneziawg
@@ -45,22 +45,10 @@ jobs:
           echo "CONFIG_PACKAGE_kmod-amneziawg=m" >> .config
           make defconfig
 
-      - name: Download and inject WireGuard sources
+      - name: Copy WireGuard sources from AWG repo
         run: |
-          cd sdk/build_dir/target-*/linux-*/linux-*
-          mkdir -p drivers/net/wireguard
-          cd drivers/net/wireguard
-          curl -LO https://git.zx2c4.com/wireguard-linux-compat/snapshot/wireguard-linux-compat-1.0.20211208.tar.xz
-          tar -xf wireguard-linux-compat-1.0.20211208.tar.xz
-          cp -r wireguard-linux-compat-1.0.20211208/src/* .
-          rm -rf wireguard-linux-compat-1.0.20211208*
-
-      - name: Copy WireGuard sources to kmod-amneziawg
-        run: |
-          cd sdk/build_dir/target-*/linux-*/linux-*
-          mkdir -p ../kmod-amneziawg
-          cp -r drivers/net/wireguard/* ../kmod-amneziawg/
-          echo -e "#include <linux/module.h>\nint init_module(void) { return 0; }\nvoid cleanup_module(void) {}" > ../kmod-amneziawg/main.c
+          cp -r awg/kmod-amneziawg/files/src sdk/build_dir/target-*/linux-*/kmod-amneziawg/
+          echo -e "#include <linux/module.h>\nint init_module(void) { return 0; }\nvoid cleanup_module(void) {}" > sdk/build_dir/target-*/linux-*/kmod-amneziawg/main.c
 
       - name: Patch kmod-amneziawg Makefile
         run: |
