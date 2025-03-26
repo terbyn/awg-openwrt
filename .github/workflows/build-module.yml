@@ -47,7 +47,7 @@ jobs:
 
       - name: Copy WireGuard sources from AWG repo
         run: |
-          cp -r awg/kmod-amneziawg/files/src sdk/build_dir/target-*/linux-*/kmod-amneziawg/
+          cp -r ../awg/kmod-amneziawg/files/src sdk/build_dir/target-*/linux-*/kmod-amneziawg/
           echo -e "#include <linux/module.h>\nint init_module(void) { return 0; }\nvoid cleanup_module(void) {}" > sdk/build_dir/target-*/linux-*/kmod-amneziawg/main.c
 
       - name: Patch kmod-amneziawg Makefile
@@ -57,7 +57,7 @@ jobs:
 
       - name: Copy fallback Makefile if missing
         run: |
-          cp awg/kmod-fallback-makefile/Makefile sdk/build_dir/target-*/linux-*/kmod-amneziawg/Makefile || true
+          cp ../awg/kmod-fallback-makefile/Makefile sdk/build_dir/target-*/linux-*/kmod-amneziawg/Makefile || true
 
       - name: Build kernel module
         run: |
