@@ -32,7 +32,7 @@ jobs:
       - name: Add AWG feed and install packages
         run: |
           cd sdk
-          echo "src-link awgopenwrt ../" >> feeds.conf.default
+          echo "src-link kmod-amneziawg ../kmod-amneziawg" >> feeds.conf.default
           ./scripts/feeds update -a && ./scripts/feeds install -a
 
       - name: Prepare .config with only kmod-amneziawg
@@ -45,13 +45,24 @@ jobs:
       - name: Copy WireGuard sources from AWG repo
         run: |
           mkdir -p sdk/build_dir/target-*/linux-*/kmod-amneziawg/
-          cp -r kmod-amneziawg/files/src/* sdk/build_dir/target-*/linux-*/kmod-amneziawg/
+          if [ -d "kmod-amneziawg/files/src" ]; then
+            cp -r kmod-amneziawg/files/src/* sdk/build_dir/target-*/linux-*/kmod-amneziawg/
+          else
+            echo "❌ Directory kmod-amneziawg/files/src does not exist"
+            exit 1
+          fi
           echo -e "#include <linux/module.h>\nint init_module(void) { return 0; }\nvoid cleanup_module(void) {}" > sdk/build_dir/target-*/linux-*/kmod-amneziawg/main.c
 
       - name: Patch kmod-amneziawg Makefile
         run: |
-          sed -i '/selftest/d' sdk/feeds/awgopenwrt/kmod-amneziawg/Makefile
-          sed -i '/^\s*patch/ s/^/#/' sdk/feeds/awgopenwrt/kmod-amneziawg/Makefile
+          MAKEFILE_PATH=$(find sdk/feeds -type f -path "*/kmod-amneziawg/Makefile" | head -n1)
+          if [ -f "$MAKEFILE_PATH" ]; then
+            sed -i '/selftest/d' "$MAKEFILE_PATH"
+            sed -i '/^\s*patch/ s/^/#/' "$MAKEFILE_PATH"
+          else
+            echo "❌ kmod-amneziawg Makefile not found"
+            exit 1
+          fi
 
       - name: Copy fallback Makefile if missing
         run: |
