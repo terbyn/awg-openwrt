@@ -32,7 +32,7 @@ jobs:
       - name: Add AWG feed and install packages
         run: |
           cd sdk
-          echo "src-link kmod-amneziawg ../kmod-amneziawg" >> feeds.conf.default
+          echo -e "\nsrc-link kmod-amneziawg ../kmod-amneziawg" >> feeds.conf.default
           ./scripts/feeds update -a && ./scripts/feeds install -a
 
       - name: Prepare .config with only kmod-amneziawg
@@ -44,14 +44,14 @@ jobs:
 
       - name: Copy WireGuard sources from AWG repo
         run: |
-          mkdir -p sdk/build_dir/target-*/linux-*/kmod-amneziawg/
+          mkdir -p sdk/build_dir/target-${{ matrix.build_env.pkgarch }}/linux-${{ matrix.build_env.target }}_${{ matrix.build_env.subtarget }}/kmod-amneziawg/
           if [ -d "kmod-amneziawg/files/src" ]; then
-            cp -r kmod-amneziawg/files/src/* sdk/build_dir/target-*/linux-*/kmod-amneziawg/
+            cp -r kmod-amneziawg/files/src/* sdk/build_dir/target-${{ matrix.build_env.pkgarch }}/linux-${{ matrix.build_env.target }}_${{ matrix.build_env.subtarget }}/kmod-amneziawg/
           else
             echo "❌ Directory kmod-amneziawg/files/src does not exist"
             exit 1
           fi
-          echo -e "#include <linux/module.h>\nint init_module(void) { return 0; }\nvoid cleanup_module(void) {}" > sdk/build_dir/target-*/linux-*/kmod-amneziawg/main.c
+          echo -e "#include <linux/module.h>\nint init_module(void) { return 0; }\nvoid cleanup_module(void) {}" > sdk/build_dir/target-${{ matrix.build_env.pkgarch }}/linux-${{ matrix.build_env.target }}_${{ matrix.build_env.subtarget }}/kmod-amneziawg/main.c
 
       - name: Patch kmod-amneziawg Makefile
         run: |
@@ -66,7 +66,7 @@ jobs:
 
       - name: Copy fallback Makefile if missing
         run: |
-          cp kmod-fallback-makefile/Makefile sdk/build_dir/target-*/linux-*/kmod-amneziawg/Makefile || true
+          cp kmod-fallback-makefile/Makefile sdk/build_dir/target-${{ matrix.build_env.pkgarch }}/linux-${{ matrix.build_env.target }}_${{ matrix.build_env.subtarget }}/kmod-amneziawg/Makefile || true
 
       - name: Build kernel module
         run: |
@@ -76,7 +76,7 @@ jobs:
       - name: Verify vermagic
         run: |
           cd sdk
-          VERMAGIC=$(cat build_dir/target-*/linux-*/linux-*/.vermagic)
+          VERMAGIC=$(cat build_dir/target-${{ matrix.build_env.pkgarch }}/linux-${{ matrix.build_env.target }}_${{ matrix.build_env.subtarget }}/linux-*/.vermagic)
           echo "VERMAGIC=$VERMAGIC"
           if [ "$VERMAGIC" != "${{ matrix.build_env.vermagic }}" ]; then
             echo "❌ Vermagic mismatch: $VERMAGIC != ${{ matrix.build_env.vermagic }}"
