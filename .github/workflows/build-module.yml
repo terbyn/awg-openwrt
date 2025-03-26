@@ -58,6 +58,7 @@ jobs:
       - name: Copy WireGuard sources to kmod-amneziawg
         run: |
           cd sdk/build_dir/target-*/linux-*/linux-*
+          mkdir -p ../kmod-amneziawg
           cp -r drivers/net/wireguard/* ../kmod-amneziawg/
 
       - name: Patch kmod-amneziawg Makefile
