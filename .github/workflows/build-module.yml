@@ -32,7 +32,7 @@ jobs:
       - name: Add AWG feed and install packages
         run: |
           cd sdk
-          echo -e "\nsrc-link kmod-amneziawg ../kmod-amneziawg" >> feeds.conf.default
+          echo "src-link kmod-amneziawg ../kmod-amneziawg" >> feeds.conf.default
           ./scripts/feeds update -a && ./scripts/feeds install -a
 
       - name: Prepare .config with only kmod-amneziawg
