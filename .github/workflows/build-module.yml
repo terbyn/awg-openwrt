@@ -60,6 +60,7 @@ jobs:
           cd sdk/build_dir/target-*/linux-*/linux-*
           mkdir -p ../kmod-amneziawg
           cp -r drivers/net/wireguard/* ../kmod-amneziawg/
+          touch ../kmod-amneziawg/main.c  # Добавим заглушку для main.o
 
       - name: Patch kmod-amneziawg Makefile
         run: |
